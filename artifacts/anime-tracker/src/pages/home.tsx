@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { HeroSection } from "@/components/anime/hero-section";
 import { AnimeRow } from "@/components/anime/anime-row";
 import {
@@ -20,31 +19,34 @@ export default function HomePage() {
       <HeroSection anime={trending.data} isLoading={trending.isLoading} />
 
       {/* Rows */}
-      <div className="relative z-10 -mt-16 pb-16 space-y-10">
-        {/* Airing Today */}
-        <AnimeRow
-          title="Airing Today"
-          anime={airingToday.data}
-          isLoading={airingToday.isLoading}
-        />
+      <div className="relative z-10 -mt-12 pb-20 space-y-12">
+        {airingToday.data && airingToday.data.length > 0 && (
+          <AnimeRow
+            title="Airing Today"
+            emoji="📡"
+            anime={airingToday.data}
+            isLoading={airingToday.isLoading}
+            accent
+          />
+        )}
 
-        {/* Trending */}
         <AnimeRow
           title="Trending Now"
+          emoji="🔥"
           anime={trending.data}
           isLoading={trending.isLoading}
         />
 
-        {/* Popular This Season */}
         <AnimeRow
           title="Popular This Season"
+          emoji="⭐"
           anime={popular.data}
           isLoading={popular.isLoading}
         />
 
-        {/* Coming Soon */}
         <AnimeRow
           title="Coming Soon"
+          emoji="🗓"
           anime={upcoming.data}
           isLoading={upcoming.isLoading}
         />

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { Clock } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, ChevronRight, Radio } from "lucide-react";
 import { useTrendingAnime, useUpcomingAnime } from "@/hooks/use-anime";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { PlatformBadges } from "@/components/ui/platform-badges";
@@ -11,92 +11,122 @@ import { useAppSettings } from "@/hooks/use-app-settings";
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-function formatTime(timestamp: number, showJST: boolean) {
+function getWeekDays(): { label: string; shortLabel: string; date: Date; dayIndex: number }[] {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    return {
+      label: i === 0 ? "Today" : i === 1 ? "Tomorrow" : DAYS[d.getDay()],
+      shortLabel: i === 0 ? "Today" : SHORT_DAYS[d.getDay()],
+      date: d,
+      dayIndex: d.getDay(),
+    };
+  });
+}
+
+function formatTime(timestamp: number, showJST: boolean): string {
   const date = new Date(timestamp * 1000);
   const local = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
   if (!showJST) return local;
-
-  const jst = new Date(timestamp * 1000).toLocaleTimeString("en-US", {
+  const jst = date.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: "Asia/Tokyo",
   });
-  return `${local} (${jst} JST)`;
+  return `${local} · ${jst} JST`;
 }
 
-function ScheduleItem({ anime }: { anime: Anime }) {
-  const { showJST } = useAppSettings();
+function ScheduleRow({ anime, showJST }: { anime: Anime; showJST: boolean }) {
+  const [, navigate] = useLocation();
   if (!anime.nextAiringEpisode) return null;
+  const { airingAt, episode, timeUntilAiring } = anime.nextAiringEpisode;
+  const isLive = timeUntilAiring <= 0;
+  const isSoon = timeUntilAiring > 0 && timeUntilAiring < 3600;
   const title = anime.title.english || anime.title.romaji;
-  const isLive = anime.nextAiringEpisode.timeUntilAiring <= 0;
 
   return (
-    <Link href={`/anime/${anime.id}`}>
-      <motion.div
-        whileHover={{ x: 4 }}
-        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-          isLive
-            ? "bg-primary/10 border border-primary/20"
-            : "bg-[#141414] hover:bg-[#1c1c1c] border border-white/5"
-        }`}
-      >
-        <img
-          src={anime.coverImage.large}
-          alt={title}
-          className="w-10 h-14 object-cover rounded flex-shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-semibold truncate">{title}</p>
-          <p className="text-white/50 text-xs mt-0.5">
-            Ep {anime.nextAiringEpisode.episode} &middot;{" "}
-            {formatTime(anime.nextAiringEpisode.airingAt, showJST)}
-          </p>
-          <div className="mt-1">
-            <PlatformBadges links={anime.externalLinks} limit={2} />
-          </div>
-        </div>
-        <div className="text-right flex-shrink-0">
-          {isLive ? (
-            <span className="flex items-center gap-1 text-primary text-xs font-bold">
-              <span className="relative flex h-2 w-2">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={() => navigate(`/anime/${anime.id}`)}
+      className={`group flex items-center gap-4 p-3.5 rounded-xl cursor-pointer transition-all border ${
+        isLive
+          ? "bg-primary/10 border-primary/30 hover:bg-primary/15"
+          : isSoon
+          ? "bg-yellow-500/5 border-yellow-500/20 hover:bg-yellow-500/10"
+          : "bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1]"
+      }`}
+    >
+      {/* Cover */}
+      <img
+        src={anime.coverImage.large}
+        alt={title}
+        className="w-10 h-14 object-cover rounded-lg flex-shrink-0"
+      />
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          {isLive && (
+            <span className="flex items-center gap-1 text-primary text-[10px] font-bold">
+              <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
               </span>
               LIVE
             </span>
+          )}
+          <p className="text-white text-sm font-semibold truncate">{title}</p>
+        </div>
+        <p className="text-white/45 text-xs">
+          Ep {episode} · {formatTime(airingAt, showJST)}
+        </p>
+        <div className="mt-1.5">
+          <PlatformBadges links={anime.externalLinks} limit={2} />
+        </div>
+      </div>
+
+      {/* Countdown + arrow */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="text-right">
+          {isLive ? (
+            <span className="text-primary font-bold text-xs">Now</span>
           ) : (
-            <CountdownTimer
-              airingAt={anime.nextAiringEpisode.airingAt}
-              className="text-xs text-white/60"
-            />
+            <CountdownTimer airingAt={airingAt} className="text-xs text-white/50 font-mono" />
           )}
         </div>
-      </motion.div>
-    </Link>
+        <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/50 transition-colors" />
+      </div>
+    </motion.div>
   );
 }
 
 export default function SchedulePage() {
   const trending = useTrendingAnime();
   const upcoming = useUpcomingAnime();
+  const { showJST } = useAppSettings();
+  const weekDays = useMemo(() => getWeekDays(), []);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+
   const allAnime = useMemo(() => {
-    return [...(trending.data ?? []), ...(upcoming.data ?? [])].filter(
-      a => a.nextAiringEpisode
-    );
+    return [...(trending.data ?? []), ...(upcoming.data ?? [])].filter(a => a.nextAiringEpisode);
   }, [trending.data, upcoming.data]);
 
-  const today = new Date().getDay();
-
-  const byDay = useMemo(() => {
+  // Build a map from weekday offset (0=today, 1=tomorrow, ...) to anime
+  const byOffset = useMemo(() => {
     const map: Record<number, Anime[]> = {};
     for (let i = 0; i < 7; i++) map[i] = [];
 
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+
     allAnime.forEach(anime => {
-      if (!anime.nextAiringEpisode) return;
-      const date = new Date(anime.nextAiringEpisode.airingAt * 1000);
-      const dayOfWeek = date.getDay();
-      map[dayOfWeek].push(anime);
+      const at = anime.nextAiringEpisode!.airingAt;
+      const offset = Math.floor((at - todayStart) / 86400);
+      if (offset >= 0 && offset < 7) {
+        map[offset].push(anime);
+      }
     });
 
     Object.values(map).forEach(arr =>
@@ -107,62 +137,101 @@ export default function SchedulePage() {
   }, [allAnime]);
 
   const isLoading = trending.isLoading || upcoming.isLoading;
+  const selectedAnime = byOffset[selectedDayIdx] ?? [];
 
   return (
-    <div className="pt-20 pb-16 px-4 md:px-8 lg:px-12 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="flex items-center gap-3 mb-8">
-          <Clock className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl md:text-3xl font-black text-white">Weekly Schedule</h1>
-        </div>
+    <div className="pt-20 pb-16 min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 md:px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 mb-6"
+        >
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+            <Clock className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white">Weekly Schedule</h1>
+            <p className="text-white/40 text-xs mt-0.5">Episode release times in your local timezone</p>
+          </div>
+        </motion.div>
 
         {/* Day tabs */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {DAYS.map((day, i) => (
-            <div
-              key={day}
-              className={`text-center py-2 rounded-t text-xs sm:text-sm font-bold ${
-                i === today
-                  ? "bg-primary text-white"
-                  : "bg-[#141414] text-white/50"
-              }`}
-            >
-              <span className="hidden sm:block">{day}</span>
-              <span className="sm:hidden">{SHORT_DAYS[i]}</span>
-            </div>
-          ))}
+        <div className="flex gap-1.5 mb-6 overflow-x-auto scrollbar-hide pb-1">
+          {weekDays.map((day, i) => {
+            const count = byOffset[i]?.length ?? 0;
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDayIdx(i)}
+                className={`flex-shrink-0 flex flex-col items-center gap-0.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                  selectedDayIdx === i
+                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                    : "bg-white/[0.04] text-white/50 border-white/[0.06] hover:bg-white/[0.08] hover:text-white/70"
+                }`}
+              >
+                <span>{day.shortLabel}</span>
+                {count > 0 && (
+                  <span className={`text-[10px] font-bold ${selectedDayIdx === i ? "text-white/70" : "text-primary"}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-7 gap-1 min-h-[400px]">
-          {DAYS.map((day, i) => (
-            <div
-              key={day}
-              className={`rounded-b p-2 space-y-2 ${
-                i === today ? "bg-primary/5 border border-primary/20" : "bg-[#0d0d0d] border border-white/5"
-              }`}
-            >
-              {isLoading ? (
-                <div className="space-y-2">
-                  {[1, 2].map(j => (
-                    <div key={j} className="h-16 bg-white/5 rounded animate-pulse" />
-                  ))}
-                </div>
-              ) : byDay[i].length === 0 ? (
-                <p className="text-white/20 text-xs text-center pt-4">—</p>
-              ) : (
-                byDay[i].map(anime => (
-                  <ScheduleItem key={anime.id} anime={anime} />
-                ))
+        {/* Date label */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-white font-bold text-base">
+              {weekDays[selectedDayIdx]?.label}
+              {selectedDayIdx > 1 && (
+                <span className="text-white/40 font-normal text-sm ml-2">
+                  {weekDays[selectedDayIdx]?.date.toLocaleDateString([], { month: "short", day: "numeric" })}
+                </span>
               )}
-            </div>
-          ))}
+            </p>
+            <p className="text-white/35 text-xs mt-0.5">
+              {selectedAnime.length === 0 ? "No episodes scheduled" : `${selectedAnime.length} episode${selectedAnime.length > 1 ? "s" : ""} airing`}
+            </p>
+          </div>
+          {selectedDayIdx === 0 && selectedAnime.some(a => a.nextAiringEpisode && a.nextAiringEpisode.timeUntilAiring <= 0) && (
+            <span className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-full border border-primary/20">
+              <Radio className="w-3.5 h-3.5" />
+              Live now
+            </span>
+          )}
         </div>
-      </motion.div>
+
+        {/* Anime list */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedDayIdx}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.15 }}
+            className="space-y-2"
+          >
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-20 bg-white/[0.03] border border-white/[0.06] rounded-xl animate-pulse" />
+              ))
+            ) : selectedAnime.length === 0 ? (
+              <div className="py-16 text-center">
+                <p className="text-4xl mb-4">🗓</p>
+                <p className="text-white/40 text-sm">No episodes scheduled for this day</p>
+              </div>
+            ) : (
+              selectedAnime.map(anime => (
+                <ScheduleRow key={anime.id} anime={anime} showJST={showJST} />
+              ))
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

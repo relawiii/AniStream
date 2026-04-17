@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSettingsProvider } from "@/hooks/use-app-settings";
 import { FollowsProvider } from "@/hooks/use-follows";
+import { NotificationsProvider } from "@/hooks/use-notifications";
 import { AppLayout } from "@/components/layout/app-layout";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
@@ -39,12 +40,14 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AppSettingsProvider>
         <FollowsProvider>
-          <TooltipProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <Toaster />
-          </TooltipProvider>
+          <NotificationsProvider>
+            <TooltipProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+              <Toaster />
+            </TooltipProvider>
+          </NotificationsProvider>
         </FollowsProvider>
       </AppSettingsProvider>
     </QueryClientProvider>

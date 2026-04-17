@@ -66,7 +66,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* DARK-ONLY THEME - AniStream */
+/* AniStream — Deep dark green theme */
 :root {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -74,52 +74,49 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  /* Deep black background */
   --background: 0 0% 4%;
   --foreground: 0 0% 96%;
-
-  --border: 0 0% 16%;
+  --border: 0 0% 15%;
   --input: 0 0% 20%;
-  --ring: 0 85% 55%;
+
+  /* Vivid green accent */
+  --ring: 142 72% 45%;
+  --primary: 142 72% 45%;
+  --primary-foreground: 0 0% 100%;
 
   --card: 0 0% 8%;
   --card-foreground: 0 0% 96%;
-  --card-border: 0 0% 14%;
+  --card-border: 0 0% 13%;
 
   --sidebar: 0 0% 5%;
   --sidebar-foreground: 0 0% 96%;
-  --sidebar-border: 0 0% 14%;
-  --sidebar-primary: 0 85% 52%;
+  --sidebar-border: 0 0% 13%;
+  --sidebar-primary: 142 72% 45%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 12%;
   --sidebar-accent-foreground: 0 0% 96%;
-  --sidebar-ring: 0 85% 52%;
+  --sidebar-ring: 142 72% 45%;
 
   --popover: 0 0% 8%;
   --popover-foreground: 0 0% 96%;
   --popover-border: 0 0% 18%;
 
-  /* Netflix-inspired crimson red */
-  --primary: 0 85% 52%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 0 0% 14%;
+  --secondary: 0 0% 13%;
   --secondary-foreground: 0 0% 90%;
-
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 55%;
-
-  --accent: 0 0% 16%;
+  --muted: 0 0% 11%;
+  --muted-foreground: 0 0% 52%;
+  --accent: 0 0% 15%;
   --accent-foreground: 0 0% 96%;
 
-  --destructive: 0 85% 52%;
+  /* Keep destructive red for errors */
+  --destructive: 0 84% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 0 85% 52%;
-  --chart-2: 30 90% 55%;
-  --chart-3: 210 85% 55%;
-  --chart-4: 270 70% 60%;
-  --chart-5: 140 70% 45%;
+  --chart-1: 142 72% 45%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 200 70% 50%;
+  --chart-4: 270 65% 60%;
+  --chart-5: 45 90% 55%;
 
   --app-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
@@ -152,31 +149,19 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased;
     background-color: #0a0a0a;
     color: #f5f5f5;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0a0a0a;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
 }
 
 @layer utilities {
-  input[type="search"]::-webkit-search-cancel-button {
-    @apply hidden;
-  }
+  input[type="search"]::-webkit-search-cancel-button { @apply hidden; }
 
   .no-default-hover-elevate {}
   .no-default-active-elevate {}
@@ -190,14 +175,8 @@
     border-radius: inherit;
     z-index: -1;
   }
-
-  .toggle-elevate.toggle-elevated::before {
-    background-color: var(--elevate-2);
-  }
-
-  .border.toggle-elevate::before {
-    inset: -1px;
-  }
+  .toggle-elevate.toggle-elevated::before { background-color: var(--elevate-2); }
+  .border.toggle-elevate::before { inset: -1px; }
 
   .hover-elevate:not(.no-default-hover-elevate),
   .active-elevate:not(.no-default-active-elevate),
@@ -206,7 +185,6 @@
     position: relative;
     z-index: 0;
   }
-
   .hover-elevate:not(.no-default-hover-elevate)::after,
   .active-elevate:not(.no-default-active-elevate)::after,
   .hover-elevate-2:not(.no-default-hover-elevate)::after,
@@ -218,31 +196,20 @@
     border-radius: inherit;
     z-index: 999;
   }
-
   .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-1);
-  }
-
+  .active-elevate:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-1); }
   .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-2);
-  }
-
+  .active-elevate-2:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-2); }
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after {
-    inset: -1px;
-  }
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after { inset: -1px; }
 
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 
   .line-clamp-2 {
     display: -webkit-box;
@@ -250,7 +217,6 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;

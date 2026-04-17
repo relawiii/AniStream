@@ -97,7 +97,7 @@ export function HeroSection({ anime, isLoading }: HeroSectionProps) {
           {/* Status badge */}
           <div className="flex items-center gap-2 mb-3">
             {featured.nextAiringEpisode && featured.nextAiringEpisode.timeUntilAiring <= 0 ? (
-              <span className="flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              <span className="flex items-center gap-1.5 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-primary/30">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
