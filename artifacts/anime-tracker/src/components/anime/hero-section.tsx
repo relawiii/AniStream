@@ -10,10 +10,11 @@ import { useFollowsContext } from "@/hooks/use-follows";
 interface HeroSectionProps {
   anime: Anime[] | undefined;
   isLoading?: boolean;
+  currentIndex: number;
+  onIndexChange: (i: number) => void;
 }
 
-export function HeroSection({ anime, isLoading }: HeroSectionProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+export function HeroSection({ anime, isLoading, currentIndex, onIndexChange }: HeroSectionProps) {
   const { isFollowing, follow, unfollow } = useFollowsContext();
 
   const featured = anime?.[currentIndex];
@@ -22,10 +23,10 @@ export function HeroSection({ anime, isLoading }: HeroSectionProps) {
   useEffect(() => {
     if (!anime || anime.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentIndex(i => (i + 1) % Math.min(5, anime.length));
+      onIndexChange((currentIndex + 1) % Math.min(5, anime.length));
     }, 8000);
     return () => clearInterval(interval);
-  }, [anime]);
+  }, [anime, currentIndex, onIndexChange]);
 
   const handleFollowClick = () => {
     if (!featured) return;
@@ -186,20 +187,6 @@ export function HeroSection({ anime, isLoading }: HeroSectionProps) {
         </motion.div>
       </div>
 
-      {/* Hero indicators */}
-      {anime && anime.length > 1 && (
-        <div className="absolute bottom-8 left-4 md:left-8 lg:left-12 flex gap-1.5 z-10">
-          {Array.from({ length: Math.min(5, anime.length) }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIndex(i)}
-              className={`h-0.5 transition-all rounded-full ${
-                i === currentIndex ? "w-6 bg-white" : "w-3 bg-white/30"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
