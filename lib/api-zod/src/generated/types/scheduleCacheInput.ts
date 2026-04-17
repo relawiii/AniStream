@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface ScheduleCacheInput {
+  animeId: number;
+  episodeNumber: number;
+  /** Unix timestamp of airing time */
+  airingAt: number;
 }

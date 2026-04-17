@@ -1,0 +1,103 @@
+Build a responsive anime tracking website with a UI inspired by Netflix. Instead of streaming content, the platform focuses on real-time anime release schedules, countdowns, and platform availability, accessible across desktop and mobile browsers.
+
+Core concept:
+The website presents anime titles in a Netflix-style layout (hero banners, horizontal rows, thumbnails). Each anime card displays live airing data, countdown timers, and where to watch instead of a play button.
+
+Features to implement:
+
+1. Anime Data Integration
+
+- Use an anime API such as AniList (GraphQL preferred) as the primary data source
+- Fetch:
+  - Title, cover image, banner
+  - Total episodes
+  - Current airing status (airing, finished, upcoming)
+  - Next episode number
+  - Exact airing timestamp
+  - Delay status (if available)
+  - Streaming platform info (if available)
+
+2. Timezone Handling
+
+- Convert all airing times (usually JST) into the user’s local timezone automatically
+- Display:
+  - Local time (default)
+  - Optional JST toggle
+- Ensure countdown timers sync with the user’s device clock
+
+3. “Airing Today” Section
+
+- Dedicated row showing anime with episodes airing within the current day (based on local timezone)
+- Sorted by nearest release time
+- Auto-refreshes every minute
+
+4. Live Countdown Timers
+
+- Each anime card displays:
+  - “Next episode in Xh Xm”
+- If under 60 minutes:
+  - Switch to minute-based countdown (e.g. “in 12 minutes”)
+- Auto-update every second or minute
+- When countdown hits zero:
+  - Refresh anime data and update episode info
+
+5. Next Episode Indicator
+
+- Show:
+  - “Episode X airs in Y minutes”
+  - “Now Airing” or “Released” when time is reached
+
+6. Notifications (Web-based)
+
+- Allow users to follow anime
+- Use browser notifications (via Notification API)
+- Triggers:
+  - Before release (custom time like 10 minutes before)
+  - At release time
+  - When delays occur
+
+7. Delay Tracking
+
+- Store previous airing timestamps (local storage or backend)
+- Compare with newly fetched data
+- If changed:
+  - Mark anime as “Delayed”
+  - Show updated schedule
+  - Trigger notification if followed
+
+8. Streaming Platform Availability
+
+- Display where the anime is available (e.g. Netflix, Crunchyroll)
+- Show platform icons/logos on cards
+- If unknown:
+  - Display “No official stream info”
+
+9. Auto-Refresh System
+
+- Lightweight refresh every 60 seconds for countdown sync
+- Full API refresh every 5–10 minutes
+- Use caching to reduce API load
+
+10. UI/UX Design
+
+- Fully responsive (mobile, tablet, desktop)
+- Dark theme (black-focused UI)
+- Netflix-style layout:
+  - Hero banner (featured anime)
+  - Scrollable rows (Trending, Airing Today, Popular, etc.)
+- Smooth animations and transitions
+- Clean overlays showing episode + countdown + platform
+
+11. Optional Backend (for scaling)
+
+- Use Node.js or similar backend
+- Store:
+  - User follows
+  - Cached anime data
+- Use scheduled jobs (cron) to:
+  - Update schedules
+  - Detect delays
+  - Send notification triggers
+
+Goal:
+Create a fast, responsive anime schedule website that works on any device, delivering real-time episode tracking, countdowns, and availability in a clean, Netflix-like interface without requiring users to search manually.
