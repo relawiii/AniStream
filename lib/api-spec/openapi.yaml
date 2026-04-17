@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AniStream - Anime release tracker API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: follows
+    description: Anime follow management
+  - name: schedule
+    description: Anime schedule cache
+  - name: notifications
+    description: Notification preferences
 paths:
   /healthz:
     get:
@@ -24,6 +30,116 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /follows:
+    get:
+      operationId: getFollows
+      tags: [follows]
+      summary: Get all followed anime
+      responses:
+        "200":
+          description: List of followed anime
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Follow"
+    post:
+      operationId: followAnime
+      tags: [follows]
+      summary: Follow an anime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowInput"
+      responses:
+        "201":
+          description: Followed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Follow"
+
+  /follows/{animeId}:
+    delete:
+      operationId: unfollowAnime
+      tags: [follows]
+      summary: Unfollow an anime
+      parameters:
+        - name: animeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Unfollowed successfully
+
+  /schedule/cache:
+    get:
+      operationId: getScheduleCache
+      tags: [schedule]
+      summary: Get cached schedule data for delay detection
+      responses:
+        "200":
+          description: Cached schedule entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleCache"
+    post:
+      operationId: upsertScheduleCache
+      tags: [schedule]
+      summary: Upsert schedule cache entry for delay detection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleCacheInput"
+      responses:
+        "200":
+          description: Cache entry saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduleCache"
+
+  /notification-prefs:
+    get:
+      operationId: getNotificationPrefs
+      tags: [notifications]
+      summary: Get notification preferences
+      responses:
+        "200":
+          description: Notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPrefs"
+    put:
+      operationId: updateNotificationPrefs
+      tags: [notifications]
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationPrefsInput"
+      responses:
+        "200":
+          description: Updated preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPrefs"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +150,120 @@ components:
       required:
         - status
 
+    Follow:
+      type: object
+      properties:
+        id:
+          type: integer
+        animeId:
+          type: integer
+        animeTitle:
+          type: string
+        animeCoverImage:
+          type: string
+          nullable: true
+        notifyBeforeMinutes:
+          type: integer
+          description: Minutes before airing to send notification
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - animeId
+        - animeTitle
+        - notifyBeforeMinutes
+        - createdAt
+
+    FollowInput:
+      type: object
+      properties:
+        animeId:
+          type: integer
+        animeTitle:
+          type: string
+        animeCoverImage:
+          type: string
+          nullable: true
+        notifyBeforeMinutes:
+          type: integer
+          default: 10
+      required:
+        - animeId
+        - animeTitle
+        - notifyBeforeMinutes
+
+    ScheduleCache:
+      type: object
+      properties:
+        id:
+          type: integer
+        animeId:
+          type: integer
+        episodeNumber:
+          type: integer
+        airingAt:
+          type: integer
+          description: Unix timestamp of airing time
+        detectedAt:
+          type: string
+          format: date-time
+        wasDelayed:
+          type: boolean
+      required:
+        - id
+        - animeId
+        - episodeNumber
+        - airingAt
+        - detectedAt
+        - wasDelayed
+
+    ScheduleCacheInput:
+      type: object
+      properties:
+        animeId:
+          type: integer
+        episodeNumber:
+          type: integer
+        airingAt:
+          type: integer
+          description: Unix timestamp of airing time
+      required:
+        - animeId
+        - episodeNumber
+        - airingAt
+
+    NotificationPrefs:
+      type: object
+      properties:
+        id:
+          type: integer
+        notificationsEnabled:
+          type: boolean
+        defaultNotifyBeforeMinutes:
+          type: integer
+        notifyOnDelay:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - notificationsEnabled
+        - defaultNotifyBeforeMinutes
+        - notifyOnDelay
+        - updatedAt
+
+    NotificationPrefsInput:
+      type: object
+      properties:
+        notificationsEnabled:
+          type: boolean
+        defaultNotifyBeforeMinutes:
+          type: integer
+        notifyOnDelay:
+          type: boolean
+      required:
+        - notificationsEnabled
+        - defaultNotifyBeforeMinutes
+        - notifyOnDelay
