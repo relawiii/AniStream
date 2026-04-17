@@ -32,7 +32,8 @@ export function FollowsProvider({ children }: { children: React.ReactNode }) {
 
   const isFollowing = useCallback(
     (animeId: number) => {
-      return follows?.some((f: { animeId: number }) => f.animeId === animeId) ?? false;
+      const safeFollows = Array.isArray(follows) ? follows : [];
+      return safeFollows.some((f: { animeId: number }) => f.animeId === animeId);
     },
     [follows]
   );
@@ -79,8 +80,10 @@ export function FollowsProvider({ children }: { children: React.ReactNode }) {
     [unfollowMutation, queryClient]
   );
 
+  const safeFollows = Array.isArray(follows) ? follows : [];
+
   return (
-    <FollowsContext.Provider value={{ follows, isLoading, isFollowing, follow, unfollow }}>
+    <FollowsContext.Provider value={{ follows: safeFollows, isLoading, isFollowing, follow, unfollow }}>
       {children}
     </FollowsContext.Provider>
   );
