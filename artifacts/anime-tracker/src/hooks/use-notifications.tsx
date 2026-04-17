@@ -131,7 +131,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     const safeFollows = Array.isArray(follows) ? follows : [];
     if (safeFollows.length === 0) return;
-    const allAnime = [...(trending.data ?? []), ...(upcoming.data ?? [])];
+    const trendingList = Array.isArray(trending.data) ? trending.data : [];
+    const upcomingList = Array.isArray(upcoming.data) ? upcoming.data : [];
+    const allAnime = [...trendingList, ...upcomingList];
 
     safeFollows.forEach(follow => {
       const anime = allAnime.find(a => a.id === follow.animeId);
@@ -142,7 +144,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       const secondsUntil = airingAt - nowSec;
       const notifyBeforeSec = (follow.notifyBeforeMinutes ?? 10) * 60;
 
-      // Key for "before" and "at" notifications to avoid re-scheduling
       const beforeKey = `before-${follow.animeId}-${episode}`;
       const atKey = `at-${follow.animeId}-${episode}`;
 
@@ -228,7 +229,6 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     </NotificationsContext.Provider>
   );
 }
-
 export function useNotifications() {
   const ctx = useContext(NotificationsContext);
   if (!ctx) throw new Error("useNotifications must be used within NotificationsProvider");
