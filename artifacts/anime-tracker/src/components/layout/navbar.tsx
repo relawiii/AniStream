@@ -54,7 +54,7 @@ export function Navbar() {
             <Link href="/">
               <span className="text-xl font-black tracking-tight cursor-pointer select-none">
                 <span className="text-primary">Ani</span>
-                <span className="text-white">Stream</span>
+                <span className="text-white">Time</span>
               </span>
             </Link>
 
