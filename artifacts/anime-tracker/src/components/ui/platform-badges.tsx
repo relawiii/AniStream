@@ -36,7 +36,8 @@ function getPlatformConfig(site: string): PlatformConfig | null {
 }
 
 export function PlatformBadges({ links, className = "", limit }: PlatformBadgesProps) {
-  const streamingLinks = links
+  const safeLinks = Array.isArray(links) ? links : []
+  const streamingLinks = safeLinks
     .map(link => ({ link, config: getPlatformConfig(link.site) }))
     .filter(({ config }) => config !== null) as Array<{ link: AnimeExternalLink; config: PlatformConfig }>;
 

@@ -279,8 +279,9 @@ const ChartLegendContent = React.forwardRef<
     ref
   ) => {
     const { config } = useChart()
+    const safePayload = Array.isArray(payload) ? payload : []
 
-    if (!payload?.length) {
+    if (safePayload.length === 0) {
       return null
     }
 
@@ -293,7 +294,7 @@ const ChartLegendContent = React.forwardRef<
           className
         )}
       >
-        {payload
+        {safePayload
           .filter((item) => item.type !== "none")
           .map((item) => {
             const key = `${nameKey || item.dataKey || "value"}`

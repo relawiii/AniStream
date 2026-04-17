@@ -108,8 +108,9 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     onClose();
   }, [navigate, onClose]);
 
+  const safeData = Array.isArray(data) ? data : []
   const showResults = debounced.trim().length >= 2;
-  const noResults = showResults && !isLoading && (!data || data.length === 0);
+  const noResults = showResults && !isLoading && safeData.length === 0;
 
   return (
     <AnimatePresence>
@@ -177,9 +178,9 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                   </div>
                 )}
 
-                {showResults && !isLoading && data && data.length > 0 && (
+                {showResults && !isLoading && safeData.length > 0 && (
                   <AnimatePresence>
-                    {data.map(anime => (
+                    {safeData.map(anime => (
                       <SearchResultRow
                         key={anime.id}
                         anime={anime}

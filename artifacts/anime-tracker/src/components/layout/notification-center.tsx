@@ -75,6 +75,7 @@ export function NotificationCenter() {
     permissionGranted,
     requestPermission,
   } = useNotifications();
+  const safeNotifications = Array.isArray(notifications) ? notifications : []
 
   // Close on outside click
   useEffect(() => {
@@ -170,14 +171,14 @@ export function NotificationCenter() {
             {/* List */}
             <div className="overflow-y-auto max-h-96">
               <AnimatePresence initial={false}>
-                {notifications.length === 0 ? (
+                {safeNotifications.length === 0 ? (
                   <div className="py-12 text-center">
                     <Bell className="w-8 h-8 text-white/10 mx-auto mb-3" />
                     <p className="text-white/30 text-sm">No notifications yet</p>
                     <p className="text-white/20 text-xs mt-1">Follow anime to get alerts</p>
                   </div>
                 ) : (
-                  notifications.map(notif => (
+                  safeNotifications.map(notif => (
                     <NotifItem key={notif.id} notif={notif} onRead={markRead} />
                   ))
                 )}

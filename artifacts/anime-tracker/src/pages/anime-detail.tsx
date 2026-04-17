@@ -213,7 +213,7 @@ export default function AnimeDetailPage() {
                   <Tv className="w-3.5 h-3.5" /> {anime.episodes} episodes
                 </span>
               )}
-              {anime.genres && anime.genres.slice(0, 3).map(g => (
+              {Array.isArray(anime.genres) && anime.genres.slice(0, 3).map(g => (
                 <span key={g} className="bg-white/[0.07] px-2.5 py-0.5 rounded-full text-xs text-white/55 border border-white/10">
                   {g}
                 </span>
