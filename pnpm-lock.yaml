@@ -1724,7 +1724,7 @@ packages:
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
   '@vercel/analytics@1.4.0':
-    resolution: {integrity: sha512-g9TTMKBMKpTiMZCMMK4UHpGpMLpqnkiNVZ7BXgNzNJFbr9rJXZDvXoQb4f3JYeJRAoJ0iRmz+0JqLxg0mNkpg==}
+    resolution: {integrity: sha512-eUwWW7l8nPJb0nJmjZuYp9o7YZ9XPj67lU9mEogaPXiFxq/SFB5DMnvQVk4aKcL8kFgotiYdDZWxdiNcWo7cgg==}
     peerDependencies:
       next: '>= 13.0.0'
       react: ^18 || ^19
