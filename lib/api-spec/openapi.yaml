@@ -78,6 +78,30 @@ paths:
         "204":
           description: Unfollowed successfully
 
+    patch:
+      operationId: updateFollowProgress
+      tags: [follows]
+      summary: Update watched episode progress
+      parameters:
+        - name: animeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowProgressInput"
+      responses:
+        "200":
+          description: Progress updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Follow"
+
   /schedule/cache:
     get:
       operationId: getScheduleCache
@@ -165,6 +189,10 @@ components:
         notifyBeforeMinutes:
           type: integer
           description: Minutes before airing to send notification
+        watchedEpisodes:
+          type: integer
+          description: Number of episodes the user has watched
+          default: 0
         createdAt:
           type: string
           format: date-time
@@ -173,6 +201,7 @@ components:
         - animeId
         - animeTitle
         - notifyBeforeMinutes
+        - watchedEpisodes
         - createdAt
 
     FollowInput:
@@ -192,6 +221,15 @@ components:
         - animeId
         - animeTitle
         - notifyBeforeMinutes
+
+    FollowProgressInput:
+      type: object
+      properties:
+        watchedEpisodes:
+          type: integer
+          minimum: 0
+      required:
+        - watchedEpisodes
 
     ScheduleCache:
       type: object

@@ -4,6 +4,7 @@ import {
   useGetFollows,
   useFollowAnime,
   useUnfollowAnime,
+  useUpdateFollowProgress,
   getGetFollowsQueryKey,
 } from "@workspace/api-client-react";
 
@@ -18,8 +19,10 @@ interface FollowsContextType {
   follows: ReturnType<typeof useGetFollows>["data"];
   isLoading: boolean;
   isFollowing: (animeId: number) => boolean;
+  getWatchedEpisodes: (animeId: number) => number;
   follow: (input: FollowInput) => void;
   unfollow: (animeId: number) => void;
+  updateProgress: (animeId: number, watchedEpisodes: number) => void;
 }
 
 const FollowsContext = createContext<FollowsContextType | undefined>(undefined);
@@ -29,6 +32,7 @@ export function FollowsProvider({ children }: { children: React.ReactNode }) {
   const { data: follows, isLoading } = useGetFollows();
   const followMutation = useFollowAnime();
   const unfollowMutation = useUnfollowAnime();
+  const progressMutation = useUpdateFollowProgress();
 
   const isFollowing = useCallback(
     (animeId: number) => {
@@ -38,9 +42,17 @@ export function FollowsProvider({ children }: { children: React.ReactNode }) {
     [follows]
   );
 
+  const getWatchedEpisodes = useCallback(
+    (animeId: number) => {
+      const safeFollows = Array.isArray(follows) ? follows : [];
+      const follow = safeFollows.find((f: { animeId: number }) => f.animeId === animeId);
+      return follow?.watchedEpisodes ?? 0;
+    },
+    [follows]
+  );
+
   const follow = useCallback(
     (input: FollowInput) => {
-      // Request notification permission on first follow
       if (typeof window !== "undefined" && "Notification" in window) {
         if (Notification.permission === "default") {
           Notification.requestPermission();
@@ -80,10 +92,24 @@ export function FollowsProvider({ children }: { children: React.ReactNode }) {
     [unfollowMutation, queryClient]
   );
 
+  const updateProgress = useCallback(
+    (animeId: number, watchedEpisodes: number) => {
+      progressMutation.mutate(
+        { animeId, data: { watchedEpisodes } },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getGetFollowsQueryKey() });
+          },
+        }
+      );
+    },
+    [progressMutation, queryClient]
+  );
+
   const safeFollows = Array.isArray(follows) ? follows : [];
 
   return (
-    <FollowsContext.Provider value={{ follows: safeFollows, isLoading, isFollowing, follow, unfollow }}>
+    <FollowsContext.Provider value={{ follows: safeFollows, isLoading, isFollowing, getWatchedEpisodes, follow, unfollow, updateProgress }}>
       {children}
     </FollowsContext.Provider>
   );

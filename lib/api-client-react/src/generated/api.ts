@@ -19,6 +19,7 @@ import type {
 import type {
   Follow,
   FollowInput,
+  FollowProgressInput,
   HealthStatus,
   NotificationPrefs,
   NotificationPrefsInput,
@@ -675,4 +676,87 @@ export const useUpdateNotificationPrefs = <
   TContext
 > => {
   return useMutation(getUpdateNotificationPrefsMutationOptions(options));
+};
+
+/**
+ * @summary Update watched episode progress for a followed anime
+ */
+export const getUpdateFollowProgressUrl = (animeId: number) => {
+  return `/api/follows/${animeId}`;
+};
+
+export const updateFollowProgress = async (
+  animeId: number,
+  followProgressInput: FollowProgressInput,
+  options?: RequestInit,
+): Promise<Follow> => {
+  return customFetch<Follow>(getUpdateFollowProgressUrl(animeId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(followProgressInput),
+  });
+};
+
+export const getUpdateFollowProgressMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateFollowProgress>>,
+    TError,
+    { animeId: number; data: BodyType<FollowProgressInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateFollowProgress>>,
+  TError,
+  { animeId: number; data: BodyType<FollowProgressInput> },
+  TContext
+> => {
+  const mutationKey = ["updateFollowProgress"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateFollowProgress>>,
+    { animeId: number; data: BodyType<FollowProgressInput> }
+  > = (props) => {
+    const { animeId, data } = props ?? {};
+    return updateFollowProgress(animeId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateFollowProgressMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateFollowProgress>>
+>;
+export type UpdateFollowProgressMutationBody = BodyType<FollowProgressInput>;
+export type UpdateFollowProgressMutationError = ErrorType<unknown>;
+
+export const useUpdateFollowProgress = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateFollowProgress>>,
+    TError,
+    { animeId: number; data: BodyType<FollowProgressInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateFollowProgress>>,
+  TError,
+  { animeId: number; data: BodyType<FollowProgressInput> },
+  TContext
+> => {
+  return useMutation(getUpdateFollowProgressMutationOptions(options));
 };

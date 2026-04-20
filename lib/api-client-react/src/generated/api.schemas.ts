@@ -16,6 +16,8 @@ export interface Follow {
   animeCoverImage?: string | null;
   /** Minutes before airing to send notification */
   notifyBeforeMinutes: number;
+  /** Number of episodes the user has watched */
+  watchedEpisodes: number;
   createdAt: string;
 }
 
@@ -24,6 +26,10 @@ export interface FollowInput {
   animeTitle: string;
   animeCoverImage?: string | null;
   notifyBeforeMinutes: number;
+}
+
+export interface FollowProgressInput {
+  watchedEpisodes: number;
 }
 
 export interface ScheduleCache {

@@ -14,13 +14,20 @@ interface AnimeCardProps {
 
 export function AnimeCard({ anime, index = 0 }: AnimeCardProps) {
   const [imageError, setImageError] = useState(false);
-  const { isFollowing, follow, unfollow } = useFollowsContext();
+  const { isFollowing, follow, unfollow, getWatchedEpisodes } = useFollowsContext();
   const followed = isFollowing(anime.id);
   const [, navigate] = useLocation();
 
   const title = anime.title.english || anime.title.romaji;
   const coverImage = imageError ? null : (anime.coverImage.extraLarge || anime.coverImage.large);
   const isNowAiring = anime.nextAiringEpisode && anime.nextAiringEpisode.timeUntilAiring <= 0;
+
+  // Behind count — only meaningful when following
+  const watchedEpisodes = followed ? getWatchedEpisodes(anime.id) : 0;
+  const latestAired = anime.nextAiringEpisode
+    ? anime.nextAiringEpisode.episode - 1
+    : (anime.episodes ?? 0);
+  const behind = followed ? Math.max(latestAired - watchedEpisodes, 0) : 0;
 
   const handleCardClick = () => {
     navigate(`/anime/${anime.id}`);
@@ -84,6 +91,17 @@ export function AnimeCard({ anime, index = 0 }: AnimeCardProps) {
             <span className="flex items-center gap-0.5 bg-black/70 text-yellow-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
               <Star className="w-2.5 h-2.5 fill-yellow-400" />
               {(anime.averageScore / 10).toFixed(1)}
+            </span>
+          </div>
+        )}
+
+        {/* Behind badge */}
+        {followed && behind > 0 && (
+          <div className="absolute bottom-2 left-2">
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              behind >= 3 ? "bg-red-500/90 text-white" : "bg-amber-500/90 text-black"
+            }`}>
+              {behind} behind
             </span>
           </div>
         )}

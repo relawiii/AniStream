@@ -8,6 +8,7 @@ export const followsTable = pgTable("follows", {
   animeTitle: text("anime_title").notNull(),
   animeCoverImage: text("anime_cover_image"),
   notifyBeforeMinutes: integer("notify_before_minutes").notNull().default(10),
+  watchedEpisodes: integer("watched_episodes").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

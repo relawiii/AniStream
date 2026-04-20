@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, Check, Star, Tv, Calendar, Info, Share2, Link as LinkIcon } from "lucide-react";
+import { Plus, Check, Star, Tv, Calendar, Info, Share2, Link as LinkIcon, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
 import { useAnimeDetail } from "@/hooks/use-anime";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { PlatformBadges } from "@/components/ui/platform-badges";
@@ -80,10 +80,11 @@ export default function AnimeDetailPage() {
   const params = useParams<{ id: string }>();
   const id = parseInt(params.id);
   const { data: anime, isLoading, error } = useAnimeDetail(id);
-  const { isFollowing, follow, unfollow } = useFollowsContext();
+  const { isFollowing, follow, unfollow, getWatchedEpisodes, updateProgress } = useFollowsContext();
   const { showJST } = useAppSettings();
 
   const followed = anime ? isFollowing(anime.id) : false;
+  const watchedEpisodes = anime ? getWatchedEpisodes(anime.id) : 0;
 
   if (isLoading) {
     return (
@@ -110,6 +111,14 @@ export default function AnimeDetailPage() {
 
   const title = anime.title.english || anime.title.romaji;
   const isNowAiring = anime.nextAiringEpisode && anime.nextAiringEpisode.timeUntilAiring <= 0;
+  const totalEpisodes = anime.episodes ?? anime.nextAiringEpisode?.episode ?? null;
+  const latestAired = anime.nextAiringEpisode
+    ? anime.nextAiringEpisode.episode - 1
+    : (anime.episodes ?? 0);
+  const behind = latestAired - watchedEpisodes;
+  const progress = latestAired > 0 ? Math.min(watchedEpisodes / latestAired, 1) : 0;
+  const isCaughtUp = behind <= 0 && latestAired > 0;
+  const isFinished = anime.status === "FINISHED" && watchedEpisodes === totalEpisodes;
 
   const handleFollowToggle = () => {
     if (followed) {
@@ -249,6 +258,79 @@ export default function AnimeDetailPage() {
               </div>
             )}
 
+            {/* Episode progress — only visible when following */}
+            {followed && latestAired > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-4 rounded-xl mb-5 border bg-white/[0.03] border-white/[0.07]"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">
+                    Your Progress
+                  </p>
+                  {isFinished ? (
+                    <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+                    </span>
+                  ) : isCaughtUp ? (
+                    <span className="text-primary text-xs font-bold">Up to date</span>
+                  ) : (
+                    <span className={`text-xs font-bold ${behind >= 3 ? "text-red-400" : "text-amber-400"}`}>
+                      {behind} ep{behind !== 1 ? "s" : ""} behind
+                    </span>
+                  )}
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-1.5 bg-white/[0.08] rounded-full overflow-hidden mb-3">
+                  <motion.div
+                    className={`h-full rounded-full ${
+                      isFinished ? "bg-emerald-500" : isCaughtUp ? "bg-primary" : behind >= 3 ? "bg-red-500" : "bg-amber-500"
+                    }`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress * 100}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  />
+                </div>
+
+                {/* Stepper */}
+                <div className="flex items-center justify-between">
+                  <span className="text-white/40 text-xs">
+                    {watchedEpisodes} / {totalEpisodes ?? latestAired} eps watched
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateProgress(anime.id, Math.max(watchedEpisodes - 1, 0))}
+                      disabled={watchedEpisodes === 0}
+                      className="p-1.5 rounded bg-white/[0.07] hover:bg-white/[0.13] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-white text-sm font-bold tabular-nums w-6 text-center">
+                      {watchedEpisodes}
+                    </span>
+                    <button
+                      onClick={() => updateProgress(anime.id, Math.min(watchedEpisodes + 1, totalEpisodes ?? latestAired))}
+                      disabled={isCaughtUp || isFinished}
+                      className="p-1.5 rounded bg-white/[0.07] hover:bg-white/[0.13] disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-white"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+                    {behind > 1 && (
+                      <button
+                        onClick={() => updateProgress(anime.id, latestAired)}
+                        className="ml-1 px-2.5 py-1 rounded bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-colors"
+                      >
+                        Catch up
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {/* Platforms */}
             <div className="mb-6">
               <p className="text-white/35 text-xs font-semibold uppercase tracking-widest mb-2.5">
@@ -300,5 +382,72 @@ export default function AnimeDetailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function formatAiringTime(timestamp: number, showJST: boolean) {
+  const date = new Date(timestamp * 1000);
+  const localStr = date.toLocaleString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (!showJST) return localStr;
+  const jstStr = date.toLocaleString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tokyo",
+  });
+  return `${localStr} (${jstStr} JST)`;
+}
+
+function ShareButton({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Check out ${title} on AniStream`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch {
+        // User cancelled or not supported — fall through to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard also failed — do nothing
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded font-bold text-sm transition-all border ${
+        copied
+          ? "bg-primary/20 text-primary border-primary/30"
+          : "bg-white/[0.06] text-white/70 border-white/10 hover:bg-white/[0.1] hover:text-white hover:border-white/20"
+      }`}
+    >
+      {copied ? (
+        <>
+          <LinkIcon className="w-4 h-4" />
+          Link copied
+        </>
+      ) : (
+        <>
+          <Share2 className="w-4 h-4" />
+          Share
+        </>
+      )}
+    </button>
   );
 }
