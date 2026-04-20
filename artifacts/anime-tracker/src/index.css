@@ -66,57 +66,59 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* AniStream — Deep dark green theme */
+/* AniTime — Summer theme: ocean blues + golden yellows */
+/* Palette: #427AB5 (sky), #406AAF (deep ocean), #F7DD7D (sun), #FFE8BE (sand) */
 :root {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255,255,255, .12);
+  --badge-outline: rgba(255,255,255, .06);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255,255,255, .05);
+  --elevate-2: rgba(255,255,255, .10);
 
-  --background: 0 0% 4%;
-  --foreground: 0 0% 96%;
-  --border: 0 0% 15%;
-  --input: 0 0% 20%;
+  /* Deep ocean background */
+  --background: 220 28% 9%;
+  --foreground: 45 80% 96%;
+  --border: 220 20% 18%;
+  --input: 220 20% 22%;
 
-  /* Vivid green accent */
-  --ring: 142 72% 45%;
-  --primary: 142 72% 45%;
+  /* Sky blue primary (#427AB5) */
+  --ring: 213 46% 48%;
+  --primary: 213 46% 48%;
   --primary-foreground: 0 0% 100%;
 
-  --card: 0 0% 8%;
-  --card-foreground: 0 0% 96%;
-  --card-border: 0 0% 13%;
+  --card: 220 25% 12%;
+  --card-foreground: 45 60% 94%;
+  --card-border: 220 20% 17%;
 
-  --sidebar: 0 0% 5%;
-  --sidebar-foreground: 0 0% 96%;
-  --sidebar-border: 0 0% 13%;
-  --sidebar-primary: 142 72% 45%;
+  --sidebar: 220 28% 8%;
+  --sidebar-foreground: 45 60% 94%;
+  --sidebar-border: 220 20% 16%;
+  --sidebar-primary: 213 46% 48%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 0% 12%;
-  --sidebar-accent-foreground: 0 0% 96%;
-  --sidebar-ring: 142 72% 45%;
+  --sidebar-accent: 220 22% 16%;
+  --sidebar-accent-foreground: 45 60% 94%;
+  --sidebar-ring: 213 46% 48%;
 
-  --popover: 0 0% 8%;
-  --popover-foreground: 0 0% 96%;
-  --popover-border: 0 0% 18%;
+  --popover: 220 25% 12%;
+  --popover-foreground: 45 60% 94%;
+  --popover-border: 220 20% 20%;
 
-  --secondary: 0 0% 13%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 0 0% 11%;
-  --muted-foreground: 0 0% 52%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 96%;
+  --secondary: 220 22% 16%;
+  --secondary-foreground: 45 50% 88%;
+  --muted: 220 20% 14%;
+  --muted-foreground: 220 15% 55%;
+  --accent: 220 20% 18%;
+  --accent-foreground: 45 60% 94%;
 
-  /* Keep destructive red for errors */
   --destructive: 0 84% 55%;
   --destructive-foreground: 0 0% 100%;
 
-  --chart-1: 142 72% 45%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 200 70% 50%;
-  --chart-4: 270 65% 60%;
-  --chart-5: 45 90% 55%;
+  /* Summer chart palette */
+  --chart-1: 213 46% 48%;
+  --chart-2: 44 90% 73%;
+  --chart-3: 36 100% 87%;
+  --chart-4: 217 44% 42%;
+  --chart-5: 44 75% 60%;
 
   --app-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --app-font-serif: Georgia, serif;
@@ -150,14 +152,14 @@
 
   body {
     @apply font-sans antialiased;
-    background-color: #0a0a0a;
-    color: #f5f5f5;
+    background-color: #111827;
+    color: #fdf6e3;
   }
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+  ::-webkit-scrollbar-track { background: #111827; }
+  ::-webkit-scrollbar-thumb { background: #406AAF; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #427AB5; }
 }
 
 @layer utilities {

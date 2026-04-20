@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar } from "./navbar";
+import { QuickNote } from "./quick-note";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -7,7 +8,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-[#111827] text-white selection:bg-primary selection:text-white">
       <Navbar />
       <main className="pb-24">
         {children}
@@ -16,6 +17,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <p>© {new Date().getFullYear()} AniTime. Not a streaming service.</p>
         <p className="mt-2">Data provided by AniList.</p>
       </footer>
+      <QuickNote />
     </div>
   );
 }

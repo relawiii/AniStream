@@ -44,7 +44,7 @@ export function Navbar() {
       <header
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           isScrolled || mobileMenuOpen
-            ? "bg-[#080808]/95 backdrop-blur-md shadow-xl shadow-black/40"
+            ? "bg-[#0d1520]/95 backdrop-blur-md shadow-xl shadow-black/40"
             : "bg-gradient-to-b from-black/85 to-transparent"
         }`}
       >
@@ -130,7 +130,7 @@ export function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/[0.08] px-5 py-4 space-y-1 bg-[#080808]/98 backdrop-blur-md">
+          <div className="md:hidden border-t border-white/[0.08] px-5 py-4 space-y-1 bg-[#0d1520]/98 backdrop-blur-md">
             {/* Mobile search */}
             <button
               onClick={() => { setSearchOpen(true); setMobileMenuOpen(false); }}
