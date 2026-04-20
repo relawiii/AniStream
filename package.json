@@ -12,6 +12,12 @@
   "devDependencies": {
     "typescript": "~5.9.2",
     "prettier": "^3.8.1",
-    "@vercel/node": "^5.0.0"
+    "@vercel/node": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.20.0",
+    "zod": "^3.23.8"
   }
 }

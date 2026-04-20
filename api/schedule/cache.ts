@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { db, scheduleCacheTable } from "../../_db";
+import { db, scheduleCacheTable } from "../_db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 

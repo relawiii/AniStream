@@ -1,6 +1,7 @@
 import React from "react";
 import { Navbar } from "./navbar";
 import { QuickNote } from "./quick-note";
+import { AnnouncementBanner } from "./announcement-banner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-[#111827] text-white selection:bg-primary selection:text-white">
       <Navbar />
+      <AnnouncementBanner />
       <main className="pb-24">
         {children}
       </main>
