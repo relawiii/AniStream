@@ -1,4 +1,4 @@
-import { db, followsTable } from "./_db";
+import { db, followsTable } from "../_db";
 import { eq } from "drizzle-orm";
 
 export default async function handler(req: any, res: any) {
