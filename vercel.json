@@ -3,12 +3,10 @@
   "buildCommand": "pnpm --filter @workspace/anime-tracker build",
   "outputDirectory": "artifacts/anime-tracker/dist",
   "framework": null,
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
