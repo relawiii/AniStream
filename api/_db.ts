@@ -15,7 +15,7 @@ import pg from "pg";
 // ─────────────────────────────────────────────────────────────────────────────
 const DATABASE_URL =
   process.env.DATABASE_URL ??
-  "postgresql://REPLACE_ME:REPLACE_ME@REPLACE_ME/REPLACE_ME?sslmode=require";
+  "postgresql://neondb_owner:npg_FB98PCejWnkM@ep-soft-cloud-ani2pbbk.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require";
 
 const pool = new pg.Pool({
   connectionString: DATABASE_URL,
