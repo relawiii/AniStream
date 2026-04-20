@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, Check, Star, Tv, Calendar, Info, Share2, Link as LinkIcon, ChevronUp, ChevronDown, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Check, Star, Tv, Calendar, Info, Share2, Link as LinkIcon, ChevronUp, ChevronDown, CheckCircle2 } from "lucide-react";
 import { useAnimeDetail } from "@/hooks/use-anime";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
 import { PlatformBadges } from "@/components/ui/platform-badges";
@@ -73,59 +73,6 @@ function ShareButton({ title }: { title: string }) {
         </>
       )}
     </button>
-  );
-}
-
-function CatchUpIndicator({
-  behind,
-  timeUntilAiring,
-}: {
-  behind: number;
-  timeUntilAiring: number;
-}) {
-  const AVG_EP_MINUTES = 24;
-  const timeNeededMinutes = behind * AVG_EP_MINUTES;
-  const timeAvailableMinutes = Math.floor(timeUntilAiring / 60);
-  const canCatchUp = timeNeededMinutes < timeAvailableMinutes;
-
-  const formatTime = (minutes: number) => {
-    if (minutes < 60) return `${minutes}m`;
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return m > 0 ? `${h}h ${m}m` : `${h}h`;
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`flex items-start gap-3 p-3.5 rounded-xl text-sm border mb-5 ${
-        canCatchUp
-          ? "bg-emerald-500/10 border-emerald-500/25"
-          : "bg-red-500/10 border-red-500/25"
-      }`}
-    >
-      <Clock
-        className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-          canCatchUp ? "text-emerald-400" : "text-red-400"
-        }`}
-      />
-      <div>
-        <p
-          className={`font-bold text-sm ${
-            canCatchUp ? "text-emerald-300" : "text-red-300"
-          }`}
-        >
-          {canCatchUp ? "You can catch up! 🎉" : "You're too far behind 😬"}
-        </p>
-        <p className="text-xs mt-0.5 text-white/45">
-          {behind} ep{behind !== 1 ? "s" : ""} behind ·{" "}
-          ~{formatTime(timeNeededMinutes)} to watch ·{" "}
-          {formatTime(timeAvailableMinutes)} until next ep
-        </p>
-      </div>
-    </motion.div>
   );
 }
 
@@ -311,18 +258,6 @@ export default function AnimeDetailPage() {
               </div>
             )}
 
-            {/* Can I Catch Up? — only when following, behind, and anime is still airing */}
-            {followed &&
-              behind > 0 &&
-              anime.nextAiringEpisode &&
-              anime.status === "RELEASING" &&
-              !isNowAiring && (
-                <CatchUpIndicator
-                  behind={behind}
-                  timeUntilAiring={anime.nextAiringEpisode.timeUntilAiring}
-                />
-              )}
-
             {/* Episode progress — only visible when following */}
             {followed && latestAired > 0 && (
               <motion.div
@@ -447,5 +382,72 @@ export default function AnimeDetailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function formatAiringTime(timestamp: number, showJST: boolean) {
+  const date = new Date(timestamp * 1000);
+  const localStr = date.toLocaleString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (!showJST) return localStr;
+  const jstStr = date.toLocaleString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tokyo",
+  });
+  return `${localStr} (${jstStr} JST)`;
+}
+
+function ShareButton({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Check out ${title} on AniStream`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch {
+        // User cancelled or not supported — fall through to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard also failed — do nothing
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded font-bold text-sm transition-all border ${
+        copied
+          ? "bg-primary/20 text-primary border-primary/30"
+          : "bg-white/[0.06] text-white/70 border-white/10 hover:bg-white/[0.1] hover:text-white hover:border-white/20"
+      }`}
+    >
+      {copied ? (
+        <>
+          <LinkIcon className="w-4 h-4" />
+          Link copied
+        </>
+      ) : (
+        <>
+          <Share2 className="w-4 h-4" />
+          Share
+        </>
+      )}
+    </button>
   );
 }
