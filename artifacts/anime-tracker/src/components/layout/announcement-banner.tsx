@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Megaphone, AlertTriangle } from "lucide-react";
+import { Megaphone, AlertTriangle } from "lucide-react";
 
 interface Announcement {
   Heading: string;
@@ -31,7 +31,6 @@ function dismissAnnouncement(id: string) {
   }
 }
 
-// Stable ID for an announcement (heading + description hash)
 function announcementId(a: Announcement): string {
   return btoa(encodeURIComponent(`${a.Heading}||${a.Description}`)).slice(0, 32);
 }
@@ -39,6 +38,7 @@ function announcementId(a: Announcement): string {
 export function AnnouncementBanner() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [dismissed, setDismissed] = useState<string[]>([]);
+  const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,73 +46,86 @@ export function AnnouncementBanner() {
     fetch(RAW_URL)
       .then((r) => r.json())
       .then((data) => {
-        // Support both array and single object
         const items: Announcement[] = Array.isArray(data) ? data : [data];
         setAnnouncements(items);
       })
-      .catch(() => {
-        // Silently fail — no announcements if fetch errors
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return null;
 
-  const visible = announcements.filter((a) => {
-    const id = announcementId(a);
-    if (a.Forced) return true; // forced always shows
-    return !dismissed.includes(id);
-  });
+  // Forced ones always show; normal ones only if not dismissed
+  const visible = announcements.filter((a) =>
+    a.Forced ? true : !dismissed.includes(announcementId(a))
+  );
 
   if (visible.length === 0) return null;
 
-  const handleDismiss = (a: Announcement) => {
-    const id = announcementId(a);
+  // Clamp index in case list shrinks after a dismiss
+  const safeIndex = Math.min(index, visible.length - 1);
+  const announcement = visible[safeIndex];
+  const isForced = announcement.Forced;
+  const isLast = safeIndex >= visible.length - 1;
+
+  const handleGotIt = () => {
+    // Dismiss this normal announcement so it never shows again
+    const id = announcementId(announcement);
     dismissAnnouncement(id);
-    setDismissed((prev) => [...prev, id]);
+    const next = [...dismissed, id];
+    setDismissed(next);
+
+    // After dismissing, the visible list shrinks — don't advance index,
+    // the same index will now point to the next item (or list will be empty)
   };
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-40 flex flex-col gap-0">
-      {visible.map((a) => {
-        const isForced = a.Forced;
-        return (
-          <div
-            key={announcementId(a)}
-            className={`w-full flex items-start gap-3 px-5 py-3 text-sm transition-all
-              ${
-                isForced
-                  ? "bg-amber-500/20 border-b border-amber-500/30 text-amber-100"
-                  : "bg-primary/15 border-b border-primary/25 text-white/90"
-              }`}
-          >
-            <div className="flex-shrink-0 mt-0.5">
-              {isForced ? (
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Megaphone className="w-4 h-4 text-primary" />
-              )}
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+      <div
+        className={`relative w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden
+          ${isForced ? "bg-[#1a1200] border-amber-500/40" : "bg-[#111827] border-white/10"}`}
+      >
+        {/* Accent bar */}
+        <div className={`h-1 w-full ${isForced ? "bg-amber-500" : "bg-primary"}`} />
 
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-start gap-3 mb-4">
+            <div className={`mt-0.5 p-2 rounded-lg ${isForced ? "bg-amber-500/15" : "bg-primary/15"}`}>
+              {isForced
+                ? <AlertTriangle className="w-5 h-5 text-amber-400" />
+                : <Megaphone className="w-5 h-5 text-primary" />
+              }
+            </div>
             <div className="flex-1 min-w-0">
-              <span className={`font-semibold mr-2 ${isForced ? "text-amber-300" : "text-primary"}`}>
-                {a.Heading}
-              </span>
-              <span className="text-white/70">{a.Description}</span>
+              <p className={`text-xs font-semibold uppercase tracking-widest mb-0.5 ${isForced ? "text-amber-500" : "text-primary"}`}>
+                {isForced ? "Important" : "Announcement"}
+              </p>
+              <h2 className="text-white font-bold text-lg leading-snug">{announcement.Heading}</h2>
             </div>
-
-            {!isForced && (
-              <button
-                onClick={() => handleDismiss(a)}
-                className="flex-shrink-0 p-1 rounded text-white/30 hover:text-white/70 hover:bg-white/10 transition-all"
-                aria-label="Dismiss announcement"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
-        );
-      })}
+
+          {/* Body */}
+          <p className="text-white/70 text-sm leading-relaxed mb-6">{announcement.Description}</p>
+
+          {/* Footer — normal announcements only; forced = no buttons */}
+          {!isForced && (
+            <div className="flex items-center justify-between gap-3">
+              {visible.filter((a) => !a.Forced).length > 1 && (
+                <span className="text-white/30 text-xs">{safeIndex + 1} / {visible.length}</span>
+              )}
+              <div className="ml-auto">
+                <button
+                  onClick={handleGotIt}
+                  className="px-4 py-2 text-sm rounded-lg font-medium bg-primary hover:bg-primary/80 text-white transition-all"
+                >
+                  {isLast ? "Got it" : "Got it"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

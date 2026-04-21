@@ -157,3 +157,8 @@ overrides:
   # drizzle-kit uses esbuild internally on an older version that's vulnerable, this overrides it
   "@esbuild-kit/esm-loader": "npm:tsx@^4.21.0"
   esbuild: "0.27.3"
+  # Force a single drizzle-orm copy across the entire monorepo.
+  # Without this, lib/db gets its own nested install which causes TypeScript
+  # to see two incompatible drizzle-orm versions — the "Column.config is
+  # protected" TS2345/TS2769 errors seen in api/follows/index.ts.
+  drizzle-orm: "^0.45.1"

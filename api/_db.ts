@@ -1,15 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import { followsTable, notificationPrefsTable, scheduleCacheTable } from "../lib/db/src/schema";
+import { followsTable, notificationPrefsTable, scheduleCacheTable } from "@workspace/db/schema";
 
 const { Pool } = pg;
-// ─────────────────────────────────────────────────────────────────────────────
-// ← Paste your connection string here (Neon, Supabase, Railway, etc.)
-// Format: postgresql://USER:PASSWORD@HOST/DATABASE?sslmode=require
-// ─────────────────────────────────────────────────────────────────────────────
-const DATABASE_URL =
-  process.env.DATABASE_URL ??
-  "postgresql://neondb_owner:npg_FB98PCejWnkM@ep-soft-cloud-ani2pbbk.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set.");
